@@ -22,22 +22,29 @@ public class PlayerController : MonoBehaviour
     private Vector2 mouseDelta;
 
     private Rigidbody _rigidbody;
+    private Animator animator;
+    private bool isMoving;
+
 
 
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
+
     }
     // Start is called before the first frame update
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
         Move();
+        animator.SetBool("isJump", !isGrounded());
     }
     private void LateUpdate()
     {
@@ -56,7 +63,6 @@ public class PlayerController : MonoBehaviour
         camCurXrot += mouseDelta.y * lookSensitivity;
         camCurXrot = Mathf.Clamp(camCurXrot, minXLook, maxXLook);
         cameraContainer.localEulerAngles = new Vector3(-camCurXrot, 0, 0);
-
         transform.eulerAngles += new Vector3(0, mouseDelta.x * lookSensitivity, 0);
     }
     public void OnMove(InputAction.CallbackContext context)
@@ -64,10 +70,12 @@ public class PlayerController : MonoBehaviour
         if (context.phase == InputActionPhase.Performed)
         {
             curMovementInput = context.ReadValue<Vector2>();
+            animator.SetBool("isWalk", true);
         }
         else if (context.phase == InputActionPhase.Canceled)
         {
             curMovementInput = Vector2.zero;
+            animator.SetBool("isWalk", false);
         }
     }
     public void OnLook(InputAction.CallbackContext context)
@@ -95,11 +103,9 @@ public class PlayerController : MonoBehaviour
         {
             if (Physics.Raycast(rays[i], 0.5f, groundLayerMask))
             {
-                Debug.Log("점프");
                 return true;
             }
         }
-        Debug.Log("점프2");
         return false;
     }
 }
